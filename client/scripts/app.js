@@ -2,7 +2,15 @@
 
 var app = {
   server: 'https://api.parse.com/1/classes/chatterbox',
-  init: function(){},
+  init: function(){
+    this.username = window.location.search.slice(10);
+    this.fetch();
+    var self = this;
+    setInterval(function() {
+      self.clearMessages.call(self);
+      self.fetch.call(self);
+    }, 5000);
+  },
   send: function(message){
     $.ajax({
       type: 'POST',
@@ -23,20 +31,20 @@ var app = {
       type: 'GET',
       url: this.server,
       contentType: 'application/json',
-      data: JSON.stringify({order: 'createdAt'}),
+      data: {order: '-createdAt'},
       success: function(data){
 
         self.renderMessages(data.results);
       },
       error: function(){
-        console.error('Error: fetching messages')
+        console.error('Error: fetching messages');
       }
 
     });
   },
   addMessage: function(messageObject){
     var $messages =  $('#chats');
-    var $messageContainer = $('<li class="chat">')
+    var $messageContainer = $('<li class="chat">');
     var $currentMessage = $('<span>');
     var $userName = $('<span class= "username">');
     $userName.text(messageObject.username);
@@ -55,8 +63,10 @@ var app = {
     $('#chats').empty();
   },
   addRoom: function(roomName){
-    $('#roomSelect')
+    var $room = $('<li class="room">');
+    $room.text(roomName);
+    $('#roomSelect').append($room);
   }
 };
 
-// data.result
+app.init();
