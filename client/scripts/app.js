@@ -8,7 +8,7 @@ $(document).ready(function(){
       this.fetch();
       var self = this;
       setInterval(function() {
-        self.clearMessages.call(self);
+        // self.clearMessages.call(self);
         self.fetch.call(self);
       }, 5000);
     },
@@ -34,7 +34,6 @@ $(document).ready(function(){
         contentType: 'application/json',
         data: {order: '-createdAt'},
         success: function(data){
-
           self.renderMessages(data.results);
         },
         error: function(){
@@ -45,19 +44,25 @@ $(document).ready(function(){
     },
     addMessage: function(messageObject){
       var $messages =  $('#chats');
-      var $messageContainer = $('<li class="chat">');
+      var $messageContainer = $('<li id="'+ messageObject.objectId +'" class="chat">');
       var $currentMessage = $('<span>');
       var $userName = $('<span class= "username">');
       $userName.text(messageObject.username);
       $currentMessage.text(': ' + messageObject.text);
       $messageContainer.append($userName);
       $messageContainer.append($currentMessage);
-      $messages.append($messageContainer);
+      $messages.prepend($messageContainer);
 
     },
     renderMessages: function(messageArray){
+      var id = {};
+      $('.chat').each(function(){
+        id[$(this).attr('id')] = true;
+      });
       for(var i = 0; i<messageArray.length; i++){
-        this.addMessage(messageArray[i]);
+        if(!id[messageArray[i].objectId]){
+          this.addMessage(messageArray[i]);
+        }
       }
     },
     clearMessages: function(){
@@ -67,28 +72,25 @@ $(document).ready(function(){
       var $room = $('<li class="room">');
       $room.text(roomName);
       $('#roomSelect').append($room);
+    },
+    onEvent: function(){
+      var message = {};
+      message.username = this.username;
+      message.text = $('#userMessage').val();
+      $('#userMessage').val('');
+      message.roomname = '';
+      this.send(message);
+      this.fetch();
     }
   };
 
   app.init();
 
-  $('button').on('click', function() {
-    var message = {};
-    message.username = app.username;
-    message.text = $('#userMessage').val();
-    $('#userMessage').val('');
-    message.roomname = '';
-    app.send(message);
-  });
+  $('button').on('click', app.onEvent.bind(app));
 
   $('#userMessage').keypress(function(event){
     if (event.which === 13) {
-      var message = {};
-      message.username = app.username;
-      message.text = $(this).val();
-      $(this).val('');
-      message.roomname = '';
-      app.send(message);
+      app.onEvent();
     }
   });
 
