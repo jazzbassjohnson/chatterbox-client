@@ -97,3 +97,6 @@ form input[type=text] {
 #userMessage {
     width: 400px;
 }
+.friend {
+    font-weight: bold;
+}

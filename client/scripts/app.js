@@ -1,9 +1,9 @@
 // YOUR CODE HERE:
-$(document).ready(function(){
 
   var app = {
     server: 'https://api.parse.com/1/classes/chatterbox',
     init: function(){
+      this.friends= {};
       this.username = window.location.search.slice(10);
       this.fetch();
       var self = this;
@@ -13,12 +13,25 @@ $(document).ready(function(){
       }, 5000);
     },
     send: function(message){
+      var self = this;
       $.ajax({
         type: 'POST',
         url: this.server,
         data: JSON.stringify(message),
         contentType: 'application/json',
-        success: function(){
+        success: function(data){
+          //construct message object
+          var messageObject = {
+            //text
+            text: message.text,
+            //username
+            username: self.username,
+            //objectId
+            objectId: data.objectId
+          };
+          //call addMessage with message  object as argument
+          self.addMessage(messageObject);
+          console.log(data);
           console.log('message sent');
         },
         error: function(){
@@ -43,13 +56,27 @@ $(document).ready(function(){
       });
     },
     addMessage: function(messageObject){
+
+      var self = this;
       var $messages =  $('#chats');
       var $messageContainer = $('<li id="'+ messageObject.objectId +'" class="chat">');
-      var $currentMessage = $('<span>');
-      var $userName = $('<span class= "username">');
-      $userName.text(messageObject.username);
+      var $currentMessage = $('<span class="message">');
+      if(this.friends[messageObject.username]){
+        $currentMessage.addClass('friend');
+      }
+      var $username = $('<span class= "username">');
+      $username.click(function(){
+        var username = $(this).text();
+        self.addFriend(username);
+        $('.message').each(function(){
+          if($(this).prev('.username').text() === username){
+            $(this).addClass('friend');
+          }
+        });
+      });
+      $username.text(messageObject.username);
       $currentMessage.text(': ' + messageObject.text);
-      $messageContainer.append($userName);
+      $messageContainer.append($username);
       $messageContainer.append($currentMessage);
       $messages.prepend($messageContainer);
 
@@ -80,9 +107,13 @@ $(document).ready(function(){
       $('#userMessage').val('');
       message.roomname = '';
       this.send(message);
-      this.fetch();
+    },
+    addFriend: function(username){
+      this.friends[username] = true;
     }
   };
+
+$(document).ready(function(){
 
   app.init();
 
@@ -92,6 +123,18 @@ $(document).ready(function(){
     if (event.which === 13) {
       app.onEvent();
     }
+  });
+
+  $('.username').click(function(){
+    console.log("clicked");
+    var username = $(this).text();
+
+    app.addFriend(username);
+    $('.message').each(function(){
+      if($(this).closest('.username').text() === username){
+        $(this).addClass('friend');
+      }
+    });
   });
 
 });
