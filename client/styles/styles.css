@@ -93,3 +93,7 @@ form input[type=text] {
     top: 0;
     right: 0;
 }
+
+#userMessage {
+    width: 400px;
+}
