@@ -100,11 +100,11 @@
       $room.text(roomName);
       $('#roomSelect').append($room);
     },
-    onEvent: function(){
+    handleSubmit: function(){
       var message = {};
       message.username = this.username;
-      message.text = $('#userMessage').val();
-      $('#userMessage').val('');
+      message.text = $('#message').val();
+      $('#message').val('');
       message.roomname = '';
       this.send(message);
     },
@@ -117,11 +117,11 @@ $(document).ready(function(){
 
   app.init();
 
-  $('button').on('click', app.onEvent.bind(app));
+  $('button').on('click', app.handleSubmit.bind(app));
 
-  $('#userMessage').keypress(function(event){
+  $('#message').keypress(function(event){
     if (event.which === 13) {
-      app.onEvent();
+      app.handleSubmit();
     }
   });
 
